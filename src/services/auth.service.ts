@@ -1,53 +1,58 @@
-import { MOCK_ADMIN_PASSWORD, MOCK_ADMIN_USER } from '../data/mockAdmin';
-import type { AdminUser } from '../types/auth';
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { auth } from "../lib/firebase";
+import type { AdminUser } from "../types/auth";
 
-const AUTH_STORAGE_KEY = 'merry_crochet_admin_session';
+const mapAuthError = (errorCode: string): string => {
+  switch (errorCode) {
+    case 'auth/invalid-email':
+      return 'Please enter a valid email address.';
+    case 'auth/user-disabled':
+      return 'This admin account has been disabled.';
+    case 'auth/user-not-found':
+    case 'auth/wrong-password':
+    case 'auth/invalid-credential':
+      return 'Invalid email or password. Please check your credentials.';
+    case 'auth/too-many-requests':
+      return 'Too many unsuccessful login attempts. Please try again later.';
+    case 'auth/network-request-failed':
+      return 'Network error. Please check your internet connection.';
+    default:
+      return 'Failed to sign in. Please try again.';
+  }
+};
 
-/**
- * Service for Admin Authentication.
- * 
- * TODO: FIREBASE AUTH INTEGRATION
- * In Stage 2, replace this mock service with Firebase Authentication methods:
- * - signInWithEmailAndPassword(auth, email, password)
- * - signOut(auth)
- * - onAuthStateChanged(auth, (user) => { ... })
- */
 export const authService = {
   login: async (email: string, password: string): Promise<AdminUser> => {
-    // TODO: FIREBASE AUTH
-    // Replace mock login with Firebase signInWithEmailAndPassword(auth, email, password)
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (email.trim().toLowerCase() === MOCK_ADMIN_USER.email && password === MOCK_ADMIN_PASSWORD) {
-          localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(MOCK_ADMIN_USER));
-          resolve(MOCK_ADMIN_USER);
-        } else {
-          reject(new Error("Invalid email or password. Use admin@merrycrochet.com / admin123"));
-        }
-      }, 400);
-    });
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email.trim(), password);
+      const user = userCredential.user;
+      return {
+        uid: user.uid,
+        email: user.email || email,
+        displayName: user.displayName || 'Admin',
+      };
+    } catch (error: any) {
+      const message = error.code ? mapAuthError(error.code) : (error.message || 'Login failed.');
+      throw new Error(message);
+    }
   },
 
   logout: async (): Promise<void> => {
-    // TODO: FIREBASE AUTH
-    // Replace with signOut(auth)
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        localStorage.removeItem(AUTH_STORAGE_KEY);
-        resolve();
-      }, 200);
-    });
+    try {
+      await signOut(auth);
+    } catch (error: any) {
+      console.error('Logout error:', error);
+      throw error;
+    }
   },
 
   getCurrentUser: (): AdminUser | null => {
-    // TODO: FIREBASE AUTH
-    // Replace with auth.currentUser or onAuthStateChanged listener
-    try {
-      const saved = localStorage.getItem(AUTH_STORAGE_KEY);
-      if (saved) return JSON.parse(saved);
-    } catch (e) {
-      console.error('Error reading auth state from localStorage', e);
-    }
-    return null;
+    const user = auth.currentUser;
+    if (!user) return null;
+    return {
+      uid: user.uid,
+      email: user.email || '',
+      displayName: user.displayName || 'Admin',
+    };
   }
 };

@@ -5,6 +5,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { ArrowLeft, Save, Loader2, Upload, CheckCircle2 } from 'lucide-react';
 import { useProduct, useUpdateProduct } from '../../hooks/useProducts';
+import { productsService } from '../../services/products.service';
+import { createImagePath } from '../../services/storage.service';
 import type { ProductAvailability } from '../../types/product';
 
 const productSchema = z.object({
@@ -26,6 +28,8 @@ export const EditProduct: React.FC = () => {
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const {
     register,
@@ -50,6 +54,7 @@ export const EditProduct: React.FC = () => {
   }, [product, reset]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormError(null);
     const file = e.target.files?.[0];
     if (file) {
       setSelectedFile(file);
@@ -81,14 +86,15 @@ export const EditProduct: React.FC = () => {
   }
 
   const onSubmit = async (data: ProductFormData) => {
+    setFormError(null);
     try {
-      /**
-       * TODO: FIRESTORE & FIREBASE STORAGE INTEGRATION
-       * If selectedFile exists:
-       * 1. uploadBytes(ref(storage, `products/${selectedFile.name}`), selectedFile)
-       * 2. getDownloadURL()
-       * Update Firestore doc with download URL.
-       */
+      setIsUploading(true);
+      let imageUrl = product.image;
+
+      if (selectedFile) {
+        imageUrl = await productsService.uploadImage(selectedFile, createImagePath(selectedFile, `products/${product.id}`));
+      }
+
       await updateProductMutation.mutateAsync({
         id: product.id,
         data: {
@@ -97,15 +103,20 @@ export const EditProduct: React.FC = () => {
           price: data.price,
           stock: data.stock,
           availability: data.availability as ProductAvailability,
-          image: imagePreview || product.image,
+          image: imageUrl,
         },
       });
 
       navigate('/admin/products');
-    } catch (e) {
+    } catch (e: any) {
       console.error('Failed to update product', e);
+      setFormError(e.message || 'Failed to update product. Please try again.');
+    } finally {
+      setIsUploading(false);
     }
   };
+
+  const isSaving = isSubmitting || updateProductMutation.isPending || isUploading;
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
@@ -121,6 +132,12 @@ export const EditProduct: React.FC = () => {
           Edit Product: {product.name}
         </h1>
       </div>
+
+      {formError && (
+        <div className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 rounded-2xl text-xs sm:text-sm text-rose-600 dark:text-rose-300">
+          {formError}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Main Form Fields */}
@@ -201,7 +218,7 @@ export const EditProduct: React.FC = () => {
             <label className="block text-xs font-semibold text-warmbrown-700 dark:text-darkbg-cream">
               Update Product Image Upload
             </label>
-            
+
             <div className="relative border-2 border-dashed border-cream-300 dark:border-darkbg-border hover:border-sage-400 dark:hover:border-sage-400 rounded-3xl p-6 text-center transition-colors bg-cream-50/50 dark:bg-darkbg-surface/50">
               <input
                 type="file"
@@ -216,6 +233,9 @@ export const EditProduct: React.FC = () => {
                 <p className="text-sm font-semibold text-warmbrown-800 dark:text-darkbg-cream">
                   Click or drag new image file here to update
                 </p>
+                <p className="text-xs text-warmbrown-500 dark:text-darkbg-muted">
+                  Supports PNG, JPG, JPEG, WEBP
+                </p>
                 {selectedFile && (
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-sage-100 dark:bg-sage-900/60 text-sage-800 dark:text-sage-300 rounded-full text-xs font-bold mt-2">
                     <CheckCircle2 className="w-3.5 h-3.5" /> {selectedFile.name}
@@ -227,13 +247,13 @@ export const EditProduct: React.FC = () => {
 
           <button
             type="submit"
-            disabled={isSubmitting || updateProductMutation.isPending}
+            disabled={isSaving}
             className="w-full py-4 px-6 bg-sage-400 hover:bg-sage-500 text-white font-bold rounded-2xl shadow-cozy text-sm flex items-center justify-center gap-2 disabled:opacity-50 mt-6"
           >
-            {isSubmitting || updateProductMutation.isPending ? (
+            {isSaving ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
-                <span>Updating Product...</span>
+                <span>{isUploading ? 'Uploading Image...' : 'Updating Product in Firestore...'}</span>
               </>
             ) : (
               <>

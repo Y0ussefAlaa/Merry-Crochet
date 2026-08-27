@@ -1,33 +1,18 @@
-/**
- * TODO: FIREBASE INITIALIZATION (Stage 2)
- * 
- * To connect Firebase:
- * 1. Install firebase: `npm install firebase`
- * 2. Fill out your Firebase Config keys below from Firebase Console
- * 3. Uncomment firebase imports & initialization functions
- * 
- * Example:
- * import { initializeApp } from "firebase/app";
- * import { getAuth } from "firebase/auth";
- * import { getFirestore } from "firebase/firestore";
- * import { getStorage } from "firebase/storage";
- * 
- * const firebaseConfig = {
- *   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
- *   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
- *   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
- *   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
- *   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
- *   appId: import.meta.env.VITE_FIREBASE_APP_ID
- * };
- * 
- * export const app = initializeApp(firebaseConfig);
- * export const auth = getAuth(app);
- * export const db = getFirestore(app);
- * export const storage = getStorage(app);
- */
+import { initializeApp, getApps, getApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
-export const firebaseConfigInfo = {
-  isConfigured: false,
-  message: "Stage 1 running with mock data. Ready for Firebase Stage 2 integration."
+const firebaseConfig = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyDHIX_C8l18xFnNtHwCLZvUdEKZaRMOYM0",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "weptest-2ce09.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "weptest-2ce09",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "weptest-2ce09.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "1070648796057",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:1070648796057:web:fcbd90db9a2598e9a7e908",
 };
+
+export const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+export const storage = getStorage(app);

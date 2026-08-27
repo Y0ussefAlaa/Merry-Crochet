@@ -28,19 +28,14 @@ export const AdminLogin: React.FC = () => {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: 'admin@merrycrochet.com',
-      password: 'admin123',
+      email: '',
+      password: '',
     },
   });
 
   const onSubmit = async (data: LoginFormData) => {
     setErrorMessage(null);
     try {
-      /**
-       * TODO: FIREBASE AUTH
-       * In Stage 2, replace this call with Firebase Authentication:
-       * await signInWithEmailAndPassword(auth, data.email, data.password);
-       */
       await login(data.email, data.password);
       navigate(from, { replace: true });
     } catch (err: any) {
@@ -65,18 +60,10 @@ export const AdminLogin: React.FC = () => {
           </p>
         </div>
 
-        {/* Development Credentials Hint Banner */}
-        <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 rounded-2xl text-xs text-amber-800 dark:text-amber-300 space-y-1">
-          <p className="font-bold flex items-center gap-1">
-            <AlertCircle className="w-3.5 h-3.5" /> Stage 1 Development Credentials:
-          </p>
-          <p>Email: <code className="bg-amber-100 dark:bg-amber-900/60 px-1 rounded">admin@merrycrochet.com</code></p>
-          <p>Password: <code className="bg-amber-100 dark:bg-amber-900/60 px-1 rounded">admin123</code></p>
-        </div>
-
         {errorMessage && (
-          <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 rounded-2xl text-xs text-rose-600 dark:text-rose-300">
-            {errorMessage}
+          <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 rounded-2xl text-xs text-rose-600 dark:text-rose-300 flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <span>{errorMessage}</span>
           </div>
         )}
 
@@ -90,6 +77,7 @@ export const AdminLogin: React.FC = () => {
               <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="email"
+                placeholder="admin@merrycrochet.com"
                 {...register('email')}
                 className="w-full pl-10 pr-4 py-3 bg-cream-50 dark:bg-darkbg-surface text-warmbrown-800 dark:text-darkbg-cream rounded-2xl text-sm border border-cream-300 dark:border-darkbg-border focus:ring-2 focus:ring-sage-400 outline-none transition-all"
               />
@@ -108,6 +96,7 @@ export const AdminLogin: React.FC = () => {
               <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="password"
+                placeholder="••••••••"
                 {...register('password')}
                 className="w-full pl-10 pr-4 py-3 bg-cream-50 dark:bg-darkbg-surface text-warmbrown-800 dark:text-darkbg-cream rounded-2xl text-sm border border-cream-300 dark:border-darkbg-border focus:ring-2 focus:ring-sage-400 outline-none transition-all"
               />

@@ -1,101 +1,139 @@
-import { mockOrders } from '../data/mockOrders';
-import type { Order, OrderStatus } from '../types/order';
+import {
+  collection,
+  getDocs,
+  getDoc,
+  doc,
+  addDoc,
+  updateDoc,
+  serverTimestamp,
+  query,
+  orderBy,
+} from "firebase/firestore";
+import { db } from "../lib/firebase";
+import type { Order, OrderStatus } from "../types/order";
 
-const STORAGE_KEY = 'merry_crochet_mock_orders';
-
-const getStoredOrders = (): Order[] => {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) return JSON.parse(saved);
-  } catch (e) {
-    console.error('Error reading orders from localStorage', e);
+const formatOrderDoc = (docSnap: { id: string; data: () => any }): Order => {
+  const data = docSnap.data();
+  let createdAtStr = new Date().toISOString();
+  if (data.createdAt?.toDate) {
+    createdAtStr = data.createdAt.toDate().toISOString();
+  } else if (typeof data.createdAt === 'string') {
+    createdAtStr = data.createdAt;
+  } else if (data.createdAt?.seconds) {
+    createdAtStr = new Date(data.createdAt.seconds * 1000).toISOString();
   }
-  return mockOrders;
+
+  return {
+    id: docSnap.id,
+    customer: {
+      name: data.customer?.name || '',
+      phone: data.customer?.phone || '',
+      address: data.customer?.address || '',
+      notes: data.customer?.notes || '',
+    },
+    items: Array.isArray(data.items)
+      ? data.items.map((item: any) => ({
+          productId: item.productId || '',
+          productName: item.productName || '',
+          price: Number(item.price) || 0,
+          quantity: Number(item.quantity) || 1,
+          image: item.image || '',
+        }))
+      : [],
+    subtotal: Number(data.subtotal) || 0,
+    deliveryFee: Number(data.deliveryFee) || 0,
+    total: Number(data.total) || 0,
+    status: (data.status as OrderStatus) || 'pending',
+    createdAt: createdAtStr,
+  };
 };
 
-const saveStoredOrders = (orders: Order[]) => {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(orders));
-  } catch (e) {
-    console.error('Error saving orders to localStorage', e);
-  }
-};
-
-/**
- * Service layer for Order management in Merry Crochet.
- * 
- * TODO: FIREBASE FIRESTORE INTEGRATION
- * Collection: "orders"
- * Replace mock implementations with Firestore SDK methods:
- * - addDoc(collection(db, "orders"), orderPayload)
- * - query(collection(db, "orders"), orderBy("createdAt", "desc"))
- * - updateDoc(doc(db, "orders", id), { status })
- * 
- * TODO: FIRESTORE SECURITY RULES
- * Customers can create orders via guest checkout (write-only).
- * Only authenticated admin users can read orders, query customer details, or update order statuses.
- */
 export const ordersService = {
-  createOrder: async (orderData: Omit<Order, 'id' | 'createdAt' | 'status'>): Promise<{ success: boolean; orderId: string; order: Order }> => {
-    // TODO: FIRESTORE - Replace with addDoc(collection(db, "orders"), { ...orderData, status: "pending", createdAt: serverTimestamp() })
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const orderId = `ORD-${Math.floor(1000 + Math.random() * 9000)}`;
-        const newOrder: Order = {
-          ...orderData,
-          id: orderId,
-          status: 'pending',
-          createdAt: new Date().toISOString(),
-        };
+  createOrder: async (
+    orderData: Omit<Order, 'id' | 'createdAt' | 'status'>
+  ): Promise<{ success: boolean; orderId: string; order: Order }> => {
+    try {
+      const payload = {
+        customer: {
+          name: orderData.customer.name,
+          phone: orderData.customer.phone,
+          address: orderData.customer.address,
+          notes: orderData.customer.notes || '',
+        },
+        items: orderData.items.map((item) => ({
+          productId: item.productId,
+          productName: item.productName,
+          price: Number(item.price),
+          quantity: Number(item.quantity),
+          image: item.image || '',
+        })),
+        subtotal: Number(orderData.subtotal),
+        deliveryFee: Number(orderData.deliveryFee),
+        total: Number(orderData.total),
+        status: 'pending' as OrderStatus,
+        createdAt: serverTimestamp(),
+      };
 
-        const current = getStoredOrders();
-        saveStoredOrders([newOrder, ...current]);
+      const docRef = await addDoc(collection(db, 'orders'), payload);
+      const createdOrder: Order = {
+        ...orderData,
+        id: docRef.id,
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+      };
 
-        console.log("MOCK ORDER CREATED:", newOrder);
-
-        resolve({
-          success: true,
-          orderId,
-          order: newOrder
-        });
-      }, 500);
-    });
+      return {
+        success: true,
+        orderId: docRef.id,
+        order: createdOrder,
+      };
+    } catch (error) {
+      console.error('Error creating order in Firestore:', error);
+      throw error;
+    }
   },
 
   getOrders: async (): Promise<Order[]> => {
-    // TODO: FIRESTORE - Replace with getDocs(query(collection(db, "orders"), orderBy("createdAt", "desc")))
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(getStoredOrders());
-      }, 300);
-    });
+    try {
+      const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map((docSnap) => formatOrderDoc(docSnap));
+    } catch (error) {
+      console.error('Error fetching orders from Firestore:', error);
+      try {
+        const snapshot = await getDocs(collection(db, 'orders'));
+        const orders = snapshot.docs.map((docSnap) => formatOrderDoc(docSnap));
+        return orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      } catch (fallbackError) {
+        console.error('Fallback orders fetch failed:', fallbackError);
+        throw error;
+      }
+    }
   },
 
   getOrderById: async (id: string): Promise<Order | null> => {
-    // TODO: FIRESTORE - Replace doc fetch getDoc(doc(db, "orders", id))
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const orders = getStoredOrders();
-        const found = orders.find((o) => o.id === id) || null;
-        resolve(found);
-      }, 200);
-    });
+    try {
+      const docSnap = await getDoc(doc(db, 'orders', id));
+      if (!docSnap.exists()) return null;
+      return formatOrderDoc(docSnap);
+    } catch (error) {
+      console.error(`Error fetching order ${id}:`, error);
+      throw error;
+    }
   },
 
   updateOrderStatus: async (id: string, status: OrderStatus): Promise<Order> => {
-    // TODO: FIRESTORE - Replace with updateDoc(doc(db, "orders", id), { status })
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const current = getStoredOrders();
-        const index = current.findIndex((o) => o.id === id);
-        if (index === -1) {
-          reject(new Error("Order not found"));
-          return;
-        }
-        current[index].status = status;
-        saveStoredOrders(current);
-        resolve(current[index]);
-      }, 300);
-    });
-  }
+    try {
+      const orderRef = doc(db, 'orders', id);
+      await updateDoc(orderRef, { status });
+      const updatedSnap = await getDoc(orderRef);
+      if (!updatedSnap.exists()) {
+        throw new Error('Order not found after update.');
+      }
+      return formatOrderDoc(updatedSnap);
+    } catch (error) {
+      console.error(`Error updating order status for ${id}:`, error);
+      throw error;
+    }
+  },
 };

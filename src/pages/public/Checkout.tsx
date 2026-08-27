@@ -33,6 +33,7 @@ export const Checkout: React.FC = () => {
 
   const [confirmedOrder, setConfirmedOrder] = useState<Order | null>(null);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const subtotal = getSubtotal();
   const deliveryFee = items.length > 0 ? 50 : 0;
@@ -62,6 +63,7 @@ export const Checkout: React.FC = () => {
   }
 
   const onSubmit = async (data: CheckoutFormData) => {
+    setSubmitError(null);
     try {
       // Create Order Snapshot
       const orderItems = items.map((item) => ({
@@ -92,8 +94,9 @@ export const Checkout: React.FC = () => {
         clearCart();
         setIsSuccessModalOpen(true);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Checkout error:', err);
+      setSubmitError(err?.message || 'Unable to submit your order. Please try again.');
     }
   };
 
@@ -120,6 +123,12 @@ export const Checkout: React.FC = () => {
           No account needed. Fill in your delivery details and we will confirm your order.
         </p>
       </div>
+
+      {submitError && (
+        <div className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 rounded-2xl text-xs sm:text-sm text-rose-600 dark:text-rose-300">
+          {submitError}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
         {/* Left: Customer Delivery Details Form */}

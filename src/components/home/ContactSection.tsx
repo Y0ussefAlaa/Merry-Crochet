@@ -23,6 +23,7 @@ type ContactFormData = z.infer<typeof contactSchema>;
 export const ContactSection: React.FC = () => {
   const createMessageMutation = useCreateMessage();
   const [submitted, setSubmitted] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
 
   const {
     register,
@@ -34,11 +35,8 @@ export const ContactSection: React.FC = () => {
   });
 
   const onSubmit = async (data: ContactFormData) => {
+    setSendError(null);
     try {
-      /**
-       * TODO: FIREBASE FIRESTORE INTEGRATION
-       * Replace createMessage mutation with addDoc(collection(db, "messages"), data)
-       */
       await createMessageMutation.mutateAsync({
         name: data.name,
         phone: data.phone,
@@ -51,8 +49,9 @@ export const ContactSection: React.FC = () => {
       setTimeout(() => {
         setSubmitted(false);
       }, 5000);
-    } catch (e) {
+    } catch (e: any) {
       console.error('Failed to send message:', e);
+      setSendError(e?.message || 'Unable to send your message. Please try again.');
     }
   };
 
@@ -111,6 +110,12 @@ export const ContactSection: React.FC = () => {
           <h3 className="text-xl font-serif font-bold text-warmbrown-800 dark:text-darkbg-cream">
             Send us a message
           </h3>
+
+          {sendError && (
+            <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 rounded-2xl text-xs text-rose-600 dark:text-rose-300">
+              {sendError}
+            </div>
+          )}
 
           {submitted ? (
             <div className="p-6 bg-sage-100 dark:bg-sage-950/60 text-sage-800 dark:text-sage-300 rounded-2xl flex flex-col items-center text-center space-y-2 animate-fade-in">

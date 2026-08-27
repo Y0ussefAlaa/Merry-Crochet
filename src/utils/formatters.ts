@@ -5,9 +5,24 @@ export const formatCurrency = (amount: number): string => {
   return `${amount.toLocaleString('en-US')} EGP`;
 };
 
-export const formatDate = (dateString: string): string => {
+export const formatDate = (dateValue: any): string => {
+  if (!dateValue) return 'Just now';
   try {
-    const date = new Date(dateString);
+    let date: Date;
+    if (typeof dateValue?.toDate === 'function') {
+      date = dateValue.toDate();
+    } else if (typeof dateValue?.seconds === 'number') {
+      date = new Date(dateValue.seconds * 1000);
+    } else if (dateValue instanceof Date) {
+      date = dateValue;
+    } else {
+      date = new Date(dateValue);
+    }
+
+    if (isNaN(date.getTime())) {
+      return String(dateValue);
+    }
+
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
       day: 'numeric',
@@ -16,7 +31,7 @@ export const formatDate = (dateString: string): string => {
       minute: '2-digit',
     }).format(date);
   } catch {
-    return dateString;
+    return String(dateValue || '');
   }
 };
 

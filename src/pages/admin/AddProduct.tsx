@@ -5,6 +5,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { ArrowLeft, Save, Loader2, Upload, CheckCircle2 } from 'lucide-react';
 import { useCreateProduct } from '../../hooks/useProducts';
+import { productsService } from '../../services/products.service';
+import { createImagePath } from '../../services/storage.service';
 import type { ProductAvailability } from '../../types/product';
 
 const productSchema = z.object({
@@ -24,6 +26,8 @@ export const AddProduct: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const {
     register,
@@ -40,6 +44,7 @@ export const AddProduct: React.FC = () => {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setImageError(null);
+    setFormError(null);
     const file = e.target.files?.[0];
     if (file) {
       if (!file.type.startsWith('image/')) {
@@ -56,21 +61,21 @@ export const AddProduct: React.FC = () => {
   };
 
   const onSubmit = async (data: ProductFormData) => {
-    if (!imagePreview && !selectedFile) {
+    setImageError(null);
+    setFormError(null);
+
+    if (!selectedFile && !imagePreview) {
       setImageError('Please upload a product image file');
       return;
     }
 
     try {
-      /**
-       * TODO: FIREBASE STORAGE INTEGRATION
-       * Replace local base64/file preview with Firebase Storage file upload:
-       * 1. const storageRef = ref(storage, `products/${Date.now()}_${selectedFile.name}`);
-       * 2. await uploadBytes(storageRef, selectedFile);
-       * 3. const downloadURL = await getDownloadURL(storageRef);
-       * 4. Save downloadURL in Firestore product document.
-       */
-      const imageUrl = imagePreview || 'https://images.unsplash.com/photo-1596704017254-9b121068fb31?auto=format&fit=crop&w=800&q=80';
+      setIsUploading(true);
+      let imageUrl = imagePreview || '';
+
+      if (selectedFile) {
+        imageUrl = await productsService.uploadImage(selectedFile, createImagePath(selectedFile, 'products'));
+      }
 
       await createProductMutation.mutateAsync({
         name: data.name,
@@ -82,10 +87,15 @@ export const AddProduct: React.FC = () => {
       });
 
       navigate('/admin/products');
-    } catch (e) {
+    } catch (e: any) {
       console.error('Failed to create product', e);
+      setFormError(e.message || 'Failed to save product. Please try again.');
+    } finally {
+      setIsUploading(false);
     }
   };
+
+  const isSaving = isSubmitting || createProductMutation.isPending || isUploading;
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
@@ -101,6 +111,12 @@ export const AddProduct: React.FC = () => {
           Add New Handmade Product
         </h1>
       </div>
+
+      {formError && (
+        <div className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 rounded-2xl text-xs sm:text-sm text-rose-600 dark:text-rose-300">
+          {formError}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Form Fields */}
@@ -178,12 +194,12 @@ export const AddProduct: React.FC = () => {
             </div>
           </div>
 
-          {/* File Upload Box (Replacing Google / Plain URL input) */}
+          {/* File Upload Box */}
           <div className="space-y-2 pt-2">
             <label className="block text-xs font-semibold text-warmbrown-700 dark:text-darkbg-cream">
               Product Image Upload *
             </label>
-            
+
             <div className="relative border-2 border-dashed border-cream-300 dark:border-darkbg-border hover:border-sage-400 dark:hover:border-sage-400 rounded-3xl p-6 text-center transition-colors bg-cream-50/50 dark:bg-darkbg-surface/50">
               <input
                 type="file"
@@ -213,13 +229,13 @@ export const AddProduct: React.FC = () => {
 
           <button
             type="submit"
-            disabled={isSubmitting || createProductMutation.isPending}
+            disabled={isSaving}
             className="w-full py-4 px-6 bg-sage-400 hover:bg-sage-500 text-white font-bold rounded-2xl shadow-cozy text-sm flex items-center justify-center gap-2 disabled:opacity-50 mt-6"
           >
-            {isSubmitting || createProductMutation.isPending ? (
+            {isSaving ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
-                <span>Saving Product...</span>
+                <span>{isUploading ? 'Uploading Image to Storage...' : 'Saving Product to Firestore...'}</span>
               </>
             ) : (
               <>
@@ -244,9 +260,7 @@ export const AddProduct: React.FC = () => {
               )}
             </div>
             <p className="text-[11px] text-warmbrown-500 dark:text-darkbg-muted leading-relaxed pt-1">
-              // TODO: FIREBASE STORAGE
-              <br />
-              In Stage 2, selecting a file uploads it directly to Firebase Storage using <code className="bg-cream-100 dark:bg-darkbg-surface px-1 rounded">uploadBytes()</code> and saves its download URL.
+              Images are stored securely in Firebase Storage and linked directly to your Firestore document.
             </p>
           </div>
         </div>
