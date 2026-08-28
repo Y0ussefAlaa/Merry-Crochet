@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
   Phone,
-  Mail,
   Camera,
   Send,
   CheckCircle2,
