@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, Outlet, useLocation } from 'react-router-dom';
-import { ShoppingBag, Sun, Moon, Menu, X, Heart, Sparkles, Phone, Mail, Camera } from 'lucide-react';
+import { ShoppingBag, Sun, Moon, Menu, X, Heart, Sparkles, Phone, Camera } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import { useCartStore } from '../store/cartStore';
 import logoImg from '../assets/logo.jpg';
@@ -233,12 +233,11 @@ export const PublicLayout: React.FC = () => {
               <div className="space-y-2 text-xs text-warmbrown-600 dark:text-darkbg-muted">
                 <p className="flex items-center gap-2">
                   <Phone className="w-3.5 h-3.5 text-sage-600 dark:text-sage-400" />
-                  <span>+20 100 123 4567</span>
+                  <span>+20 11 17021517</span>
                 </p>
-
                 <p className="flex items-center gap-2">
                   <Camera className="w-3.5 h-3.5 text-rose-500" />
-                  <span>@merry.crochet.studio</span>
+                  <span>@merry_crochet2</span>
                 </p>
               </div>
             </div>
