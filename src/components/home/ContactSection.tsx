@@ -1,21 +1,30 @@
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { Phone, Mail, Camera, Send, CheckCircle2, Loader2, User, MessageSquare } from 'lucide-react';
-import { useCreateMessage } from '../../hooks/useMessages';
-import { isValidEgyptianPhone } from '../../utils/formatters';
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import {
+  Phone,
+  Mail,
+  Camera,
+  Send,
+  CheckCircle2,
+  Loader2,
+  User,
+  MessageSquare,
+} from "lucide-react";
+import { useCreateMessage } from "../../hooks/useMessages";
+import { isValidEgyptianPhone } from "../../utils/formatters";
 
 const contactSchema = z.object({
-  name: z.string().min(2, 'Please enter your name'),
+  name: z.string().min(2, "Please enter your name"),
   phone: z
     .string()
-    .min(1, 'Phone number is required')
+    .min(1, "Phone number is required")
     .refine(
       (val) => isValidEgyptianPhone(val),
-      'Please enter a valid Egyptian phone number (e.g. 01012345678 or +201001234567)'
+      "Please enter a valid Egyptian phone number (e.g. 01012345678 or +201001234567)",
     ),
-  message: z.string().min(5, 'Message must be at least 5 characters'),
+  message: z.string().min(5, "Message must be at least 5 characters"),
 });
 
 type ContactFormData = z.infer<typeof contactSchema>;
@@ -50,16 +59,20 @@ export const ContactSection: React.FC = () => {
         setSubmitted(false);
       }, 5000);
     } catch (e: any) {
-      console.error('Failed to send message:', e);
-      setSendError(e?.message || 'Unable to send your message. Please try again.');
+      console.error("Failed to send message:", e);
+      setSendError(
+        e?.message || "Unable to send your message. Please try again.",
+      );
     }
   };
 
   return (
     // TODO: DASHBOARD DATA - Messages sent here are stored in messages dataset and rendered as cards on the Admin Dashboard Messages page (/admin/messages)
-    <section id="contact" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <section
+      id="contact"
+      className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
+    >
       <div className="bg-white dark:bg-darkbg-card border border-cream-200 dark:border-darkbg-border rounded-[2.5rem] p-8 sm:p-12 shadow-cozy grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-        
         {/* Left Contact Info */}
         <div className="lg:col-span-5 space-y-6">
           <span className="text-xs uppercase tracking-widest text-sage-600 dark:text-sage-400 font-bold">
@@ -69,7 +82,8 @@ export const ContactSection: React.FC = () => {
             Contact Merry Crochet
           </h2>
           <p className="text-sm text-warmbrown-600 dark:text-darkbg-muted leading-relaxed">
-            Have a custom order request, color preference, or questions about delivery? Send us a message or contact us directly.
+            Have a custom order request, color preference, or questions about
+            delivery? Send us a message or contact us directly.
           </p>
 
           <div className="space-y-4 pt-2 text-sm text-warmbrown-700 dark:text-darkbg-cream">
@@ -78,18 +92,10 @@ export const ContactSection: React.FC = () => {
                 <Phone className="w-5 h-5" />
               </div>
               <div>
-                <span className="text-xs text-warmbrown-500 dark:text-darkbg-muted block">Phone / WhatsApp</span>
-                <span className="font-semibold">+20 100 123 4567</span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3.5 p-3 bg-cream-100 dark:bg-darkbg-surface rounded-2xl">
-              <div className="p-2.5 bg-rose-400 text-white rounded-xl">
-                <Mail className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="text-xs text-warmbrown-500 dark:text-darkbg-muted block">Email Support</span>
-                <span className="font-semibold">hello@merrycrochet.com</span>
+                <span className="text-xs text-warmbrown-500 dark:text-darkbg-muted block">
+                  Phone / WhatsApp
+                </span>
+                <span className="font-semibold">+20 11 17021517</span>
               </div>
             </div>
 
@@ -98,8 +104,10 @@ export const ContactSection: React.FC = () => {
                 <Camera className="w-5 h-5" />
               </div>
               <div>
-                <span className="text-xs text-warmbrown-500 dark:text-darkbg-muted block">Instagram Studio</span>
-                <span className="font-semibold">@merry.crochet.studio</span>
+                <span className="text-xs text-warmbrown-500 dark:text-darkbg-muted block">
+                  Instagram Studio
+                </span>
+                <span className="font-semibold">@merry_crochet2</span>
               </div>
             </div>
           </div>
@@ -121,7 +129,10 @@ export const ContactSection: React.FC = () => {
             <div className="p-6 bg-sage-100 dark:bg-sage-950/60 text-sage-800 dark:text-sage-300 rounded-2xl flex flex-col items-center text-center space-y-2 animate-fade-in">
               <CheckCircle2 className="w-8 h-8 text-sage-600" />
               <p className="font-bold">Thank you for reaching out!</p>
-              <p className="text-xs">Your message has been sent to our dashboard. We will contact your Egyptian phone number shortly.</p>
+              <p className="text-xs">
+                Your message has been sent to our dashboard. We will contact
+                your Egyptian phone number shortly.
+              </p>
             </div>
           ) : (
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -134,11 +145,15 @@ export const ContactSection: React.FC = () => {
                   <input
                     type="text"
                     placeholder="e.g. Mariam"
-                    {...register('name')}
+                    {...register("name")}
                     className="w-full pl-10 pr-4 py-3 bg-white dark:bg-darkbg-card text-warmbrown-800 dark:text-darkbg-cream rounded-2xl text-sm border border-cream-300 dark:border-darkbg-border focus:ring-2 focus:ring-sage-400 outline-none"
                   />
                 </div>
-                {errors.name && <p className="text-xs text-rose-500 mt-1">{errors.name.message}</p>}
+                {errors.name && (
+                  <p className="text-xs text-rose-500 mt-1">
+                    {errors.name.message}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -150,11 +165,15 @@ export const ContactSection: React.FC = () => {
                   <input
                     type="tel"
                     placeholder="e.g. 01001234567 or +201001234567"
-                    {...register('phone')}
+                    {...register("phone")}
                     className="w-full pl-10 pr-4 py-3 bg-white dark:bg-darkbg-card text-warmbrown-800 dark:text-darkbg-cream rounded-2xl text-sm border border-cream-300 dark:border-darkbg-border focus:ring-2 focus:ring-sage-400 outline-none"
                   />
                 </div>
-                {errors.phone && <p className="text-xs text-rose-500 mt-1">{errors.phone.message}</p>}
+                {errors.phone && (
+                  <p className="text-xs text-rose-500 mt-1">
+                    {errors.phone.message}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -166,11 +185,15 @@ export const ContactSection: React.FC = () => {
                   <textarea
                     rows={4}
                     placeholder="Tell us what you would like crafted..."
-                    {...register('message')}
+                    {...register("message")}
                     className="w-full pl-10 pr-4 py-3 bg-white dark:bg-darkbg-card text-warmbrown-800 dark:text-darkbg-cream rounded-2xl text-sm border border-cream-300 dark:border-darkbg-border focus:ring-2 focus:ring-sage-400 outline-none"
                   />
                 </div>
-                {errors.message && <p className="text-xs text-rose-500 mt-1">{errors.message.message}</p>}
+                {errors.message && (
+                  <p className="text-xs text-rose-500 mt-1">
+                    {errors.message.message}
+                  </p>
+                )}
               </div>
 
               <button
