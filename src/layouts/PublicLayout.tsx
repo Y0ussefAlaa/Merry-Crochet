@@ -37,7 +37,7 @@ export const PublicLayout: React.FC = () => {
       {/* Main Navbar */}
       <header className="sticky top-0 z-40 bg-cream-100/95 dark:bg-darkbg/95 backdrop-blur-md border-b border-cream-200/60 dark:border-darkbg-border transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          
+
           {/* Logo & Brand Name featuring official uploaded studio logo */}
           <Link to="/" className="flex items-center gap-3 group">
             <div className="w-12 h-12 rounded-2xl overflow-hidden shadow-cozy border-2 border-sage-300 group-hover:scale-105 transition-transform duration-300 bg-cream-200">
@@ -67,11 +67,10 @@ export const PublicLayout: React.FC = () => {
             </button>
             <Link
               to="/products"
-              className={`font-medium text-sm transition-colors ${
-                location.pathname === '/products'
-                  ? 'text-sage-600 dark:text-sage-300 font-semibold'
-                  : 'text-warmbrown-700 hover:text-sage-600 dark:text-darkbg-muted dark:hover:text-darkbg-cream'
-              }`}
+              className={`font-medium text-sm transition-colors ${location.pathname === '/products'
+                ? 'text-sage-600 dark:text-sage-300 font-semibold'
+                : 'text-warmbrown-700 hover:text-sage-600 dark:text-darkbg-muted dark:hover:text-darkbg-cream'
+                }`}
             >
               Products
             </Link>
@@ -182,7 +181,7 @@ export const PublicLayout: React.FC = () => {
       <footer className="bg-cream-200/60 dark:bg-darkbg-surface border-t border-cream-300 dark:border-darkbg-border mt-16 pt-12 pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
-            
+
             {/* Brand Column with Logo */}
             <div className="space-y-4 md:col-span-1">
               <div className="flex items-center gap-3">
@@ -236,10 +235,7 @@ export const PublicLayout: React.FC = () => {
                   <Phone className="w-3.5 h-3.5 text-sage-600 dark:text-sage-400" />
                   <span>+20 100 123 4567</span>
                 </p>
-                <p className="flex items-center gap-2">
-                  <Mail className="w-3.5 h-3.5 text-sage-600 dark:text-sage-400" />
-                  <span>hello@merrycrochet.com</span>
-                </p>
+
                 <p className="flex items-center gap-2">
                   <Camera className="w-3.5 h-3.5 text-rose-500" />
                   <span>@merry.crochet.studio</span>
