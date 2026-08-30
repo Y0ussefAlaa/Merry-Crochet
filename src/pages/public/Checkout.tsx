@@ -36,8 +36,8 @@ export const Checkout: React.FC = () => {
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const subtotal = getSubtotal();
-  const deliveryFee = items.length > 0 ? 50 : 0;
-  const total = subtotal + deliveryFee;
+  const deliveryFee = 0; // Determined on contact (50 - 100 EGP)
+  const total = subtotal;
 
   const {
     register,
@@ -275,13 +275,21 @@ export const Checkout: React.FC = () => {
               <span>Subtotal</span>
               <span className="font-semibold text-warmbrown-800 dark:text-darkbg-cream">{formatCurrency(subtotal)}</span>
             </div>
-            <div className="flex justify-between text-warmbrown-600 dark:text-darkbg-muted">
+            <div className="flex justify-between items-center text-warmbrown-600 dark:text-darkbg-muted">
               <span>Delivery Fee</span>
-              <span className="font-semibold text-warmbrown-800 dark:text-darkbg-cream">{formatCurrency(deliveryFee)}</span>
+              <span className="font-semibold text-rose-600 dark:text-rose-400 text-xs bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded-lg">
+                50 - 100 EGP
+              </span>
             </div>
+            <p className="text-[11px] text-warmbrown-600 dark:text-darkbg-muted pt-1 leading-normal">
+              * سيتم التواصل معك هاتفياً أو عبر الواتساب لتأكيد قيمة الشحن بالضبط (من 50 إلى 100 جنيه).
+            </p>
             <div className="pt-2 flex justify-between items-center text-sm font-bold border-t border-cream-100 dark:border-darkbg-border">
-              <span className="text-warmbrown-800 dark:text-darkbg-cream">Total Amount</span>
-              <span className="text-lg text-rose-500 dark:text-rose-300 font-sans">{formatCurrency(total)}</span>
+              <div>
+                <span className="text-warmbrown-800 dark:text-darkbg-cream block">Products Total</span>
+                <span className="text-[11px] font-normal text-warmbrown-500 dark:text-darkbg-muted block">+ Shipping (50 - 100 EGP)</span>
+              </div>
+              <span className="text-lg text-rose-500 dark:text-rose-300 font-sans">{formatCurrency(subtotal)}</span>
             </div>
           </div>
         </div>

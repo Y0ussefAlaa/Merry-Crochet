@@ -50,7 +50,7 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onClose, ord
         )}
 
         <p className="text-warmbrown-700 dark:text-darkbg-muted text-sm sm:text-base leading-relaxed mb-6 px-2">
-          Thank you for choosing <span className="font-semibold text-sage-600 dark:text-sage-400">Merry Crochet</span>. We will contact you as soon as possible to confirm your order, delivery details, and payment method.
+          شكراً لاختيارك <span className="font-semibold text-sage-600 dark:text-sage-400">Merry Crochet</span>. سيتم التواصل معك قريباً لتأكيد طلبك وتحديد تكلفة الشحن (من 50 إلى 100 جنيه) وسداد المبلغ.
         </p>
 
         {order && (
@@ -64,8 +64,8 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onClose, ord
               <span className="font-medium text-warmbrown-800 dark:text-darkbg-cream">{order.customer.phone}</span>
             </div>
             <div className="flex justify-between py-1">
-              <span className="text-warmbrown-500 dark:text-darkbg-muted">Estimated Total:</span>
-              <span className="font-bold text-rose-500 dark:text-rose-300">{order.total} EGP</span>
+              <span className="text-warmbrown-500 dark:text-darkbg-muted">Products Subtotal:</span>
+              <span className="font-bold text-rose-500 dark:text-rose-300">{order.subtotal} EGP <span className="text-[11px] font-normal text-warmbrown-500 dark:text-darkbg-muted">(+ 50-100 EGP Shipping)</span></span>
             </div>
           </div>
         )}

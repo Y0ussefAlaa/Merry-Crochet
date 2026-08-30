@@ -196,7 +196,9 @@ export const OrderDetails: React.FC = () => {
             </div>
             <div className="flex justify-between text-warmbrown-600 dark:text-darkbg-muted">
               <span>Delivery Fee</span>
-              <span className="font-semibold text-warmbrown-800 dark:text-darkbg-cream">{formatCurrency(order.deliveryFee)}</span>
+              <span className="font-semibold text-warmbrown-800 dark:text-darkbg-cream">
+                {order.deliveryFee > 0 ? formatCurrency(order.deliveryFee) : 'TBD (50 - 100 EGP)'}
+              </span>
             </div>
             <div className="pt-3 border-t border-cream-200 dark:border-darkbg-border flex justify-between items-center text-base font-bold">
               <span className="text-warmbrown-800 dark:text-darkbg-cream">Total Price</span>

@@ -10,8 +10,6 @@ export const Cart: React.FC = () => {
   const { items, removeItem, updateQuantity, clearCart, getSubtotal } = useCartStore();
 
   const subtotal = getSubtotal();
-  const deliveryFee = items.length > 0 ? 50 : 0; // Mock delivery fee 50 EGP
-  const total = subtotal + deliveryFee;
 
   if (items.length === 0) {
     return (
@@ -132,23 +130,35 @@ export const Cart: React.FC = () => {
               <span className="font-semibold text-warmbrown-800 dark:text-darkbg-cream">{formatCurrency(subtotal)}</span>
             </div>
 
-            <div className="flex justify-between text-warmbrown-600 dark:text-darkbg-muted">
+            <div className="flex justify-between items-center text-warmbrown-600 dark:text-darkbg-muted">
               <span>Delivery Fee</span>
-              <span className="font-semibold text-warmbrown-800 dark:text-darkbg-cream">{formatCurrency(deliveryFee)}</span>
+              <span className="font-semibold text-rose-600 dark:text-rose-400 text-xs bg-rose-50 dark:bg-rose-950/40 px-2.5 py-1 rounded-lg">
+                50 - 100 EGP
+              </span>
             </div>
 
-            <div className="p-3 bg-cream-100/70 dark:bg-darkbg-surface rounded-2xl flex items-start gap-2 text-xs text-warmbrown-600 dark:text-darkbg-muted">
+            <div className="p-3 bg-cream-100/70 dark:bg-darkbg-surface rounded-2xl flex items-start gap-2.5 text-xs text-warmbrown-700 dark:text-darkbg-muted leading-relaxed">
               <Info className="w-4 h-4 text-sage-600 dark:text-sage-400 flex-shrink-0 mt-0.5" />
-              <span>Delivery fee will be confirmed with you via phone/WhatsApp after order placement.</span>
+              <div>
+                <p className="font-semibold text-warmbrown-800 dark:text-darkbg-cream mb-0.5">
+                  مصاريف الشحن: 50 إلى 100 جنيه
+                </p>
+                <p className="text-[11px] opacity-90">
+                  سيتم التواصل معك هاتفياً أو عبر الواتساب لتأكيد تفاصيل الطلب وتحديد تكلفة الشحن بالضبط.
+                </p>
+              </div>
             </div>
 
             <div className="pt-3 border-t border-cream-200 dark:border-darkbg-border flex justify-between items-end">
               <div>
-                <span className="text-xs text-warmbrown-500 dark:text-darkbg-muted block">Total Price</span>
+                <span className="text-xs text-warmbrown-500 dark:text-darkbg-muted block">Products Total</span>
                 <span className="text-2xl font-bold font-sans text-rose-500 dark:text-rose-300">
-                  {formatCurrency(total)}
+                  {formatCurrency(subtotal)}
                 </span>
               </div>
+              <span className="text-[11px] font-medium text-warmbrown-500 dark:text-darkbg-muted text-right">
+                + الشحن (50 - 100 ج.م)
+              </span>
             </div>
           </div>
 
